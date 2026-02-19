@@ -228,9 +228,20 @@
     flex-shrink: 0;
   }
 
-  .current-player-banner { text-align: center; margin-bottom: 5px; line-height: 1; }
+  .current-player-banner {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 5px; line-height: 1;
+  }
   .current-player-banner span { font-family: 'Bebas Neue', sans-serif; font-size: 11px; letter-spacing: 3px; color: var(--text-dim); text-transform: uppercase; }
   .current-player-banner strong { font-family: 'Bebas Neue', sans-serif; font-size: 17px; letter-spacing: 2px; color: var(--green-bright); margin-left: 5px; }
+  .undo-btn {
+    background: transparent; border: 1px solid var(--border); border-radius: 6px;
+    color: var(--text-dim); font-family: 'Bebas Neue', sans-serif; font-size: 13px;
+    letter-spacing: 1px; padding: 4px 10px; cursor: pointer; opacity: 0.4;
+    pointer-events: none; transition: all 0.15s; flex-shrink: 0;
+  }
+  .undo-btn.active { opacity: 1; pointer-events: auto; border-color: var(--gold); color: var(--gold); }
+  .undo-btn.active:active { background: #1a1200; }
 
   .score-display-row { display: flex; gap: 6px; margin-bottom: 6px; align-items: stretch; }
   .score-display {
@@ -418,8 +429,9 @@
 
   <div class="input-area">
     <div class="current-player-banner">
-      <span>Throwing:</span>
-      <strong id="current-player-name">—</strong>
+      <button class="undo-btn" id="undo-btn" onclick="undoLast()">↩ UNDO</button>
+      <div><span>Throwing:</span>
+      <strong id="current-player-name">—</strong></div>
     </div>
     <div class="quick-scores" id="quick-scores"></div>
     <div class="score-display-row">
@@ -579,6 +591,9 @@ function startBullThrow() {
 
 function beginLeg(firstIdx, isFirst) {
   players.forEach(p => { p.score = gameType; p.legDarts = 0; p.legScored = 0; });
+  history.length = 0;
+  const undoBtn = document.getElementById('undo-btn');
+  if (undoBtn) undoBtn.classList.remove('active');
 
   if (isFirst) {
     turnOrder = [];
@@ -663,6 +678,28 @@ function updateScoreDisplay() {
   document.getElementById('leg-indicator').textContent = `LEG ${currentLeg()}`;
 }
 
+// ═══ HISTORY / UNDO
+const history = [];
+
+function saveState() {
+  history.push({
+    players: players.map(p => ({...p})),
+    currentTurnIdx,
+  });
+  document.getElementById('undo-btn').classList.add('active');
+}
+
+function undoLast() {
+  if (!history.length) return;
+  const snap = history.pop();
+  players.forEach((p, i) => Object.assign(p, snap.players[i]));
+  currentTurnIdx = snap.currentTurnIdx;
+  currentInput = '';
+  updateScoreDisplay();
+  updateInputArea();
+  if (!history.length) document.getElementById('undo-btn').classList.remove('active');
+}
+
 // ═══ NUMPAD
 function quickScore(val) {
   currentInput = String(val);
@@ -706,6 +743,8 @@ function submitScore() {
 
   if (newScore < 0 || newScore === 1) { triggerBust(idx, false); return; }
 
+  saveState();
+
   if (newScore === 0) {
     // Ask how many darts for the checkout
     pendingCheckoutIdx = idx;
@@ -738,6 +777,7 @@ function confirmCheckout(darts) {
 }
 
 function recordBust() {
+  saveState();
   const idx = turnOrder[currentTurnIdx];
   players[idx].legDarts += 3;
   players[idx].totalDarts += 3;
