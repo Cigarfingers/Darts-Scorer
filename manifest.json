@@ -1,28 +1,12 @@
 {
-  "name": "Darts Scorer",
+  "name": "Andys Darts Scorer",
   "short_name": "Darts",
-  "description": "A clean darts scoring app for 101–501 and custom games",
-  "start_url": "/",
+  "start_url": ".",
   "display": "standalone",
   "background_color": "#080f08",
   "theme_color": "#0a1a0a",
-  "orientation": "portrait",
   "icons": [
-    {
-      "src": "icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png"
-    },
-    {
-      "src": "icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png"
-    },
-    {
-      "src": "icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "maskable"
-    }
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" }
   ]
 }
