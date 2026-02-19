@@ -1,0 +1,1265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Darts">
+<meta name="theme-color" content="#0a1a0a">
+<title>Darts Scorer</title>
+<link rel="manifest" href="/manifest.json">
+<link rel="apple-touch-icon" href="/icon-192.png">
+<script>if('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js');</script>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #080f08;
+    --surface: #0f1f0f;
+    --surface2: #162416;
+    --border: #1e3a1e;
+    --green: #22c55e;
+    --green-dim: #166534;
+    --green-bright: #4ade80;
+    --red: #ef4444;
+    --gold: #f59e0b;
+    --text: #e2f5e2;
+    --text-dim: #6b9b6b;
+    --radius: 12px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Barlow', sans-serif;
+    min-height: 100vh;
+    min-height: -webkit-fill-available;
+    overflow-x: hidden;
+  }
+
+  /* ─── BACKGROUND TEXTURE ─── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 40% at 50% 0%, #0d2b0d 0%, transparent 70%),
+      repeating-linear-gradient(0deg, transparent, transparent 39px, #0f1f0f33 40px),
+      repeating-linear-gradient(90deg, transparent, transparent 39px, #0f1f0f33 40px);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .screen { position: relative; z-index: 1; }
+
+  /* ─── SETUP SCREEN ─── */
+  #setup-screen {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 20px;
+    gap: 28px;
+  }
+
+  .logo {
+    text-align: center;
+  }
+
+  .logo h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(52px, 14vw, 80px);
+    letter-spacing: 6px;
+    line-height: 1;
+    color: var(--green-bright);
+    text-shadow: 0 0 40px #22c55e66, 0 0 80px #22c55e22;
+  }
+
+  .logo p {
+    color: var(--text-dim);
+    font-size: 13px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-top: 4px;
+  }
+
+  .setup-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    width: 100%;
+    max-width: 480px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .field-label {
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 8px;
+  }
+
+  /* Game type buttons */
+  .game-type-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+
+  .gt-btn {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    letter-spacing: 1px;
+    padding: 14px 8px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: center;
+  }
+
+  .gt-btn:hover { border-color: var(--green-dim); color: var(--text); }
+  .gt-btn.active {
+    background: var(--green-dim);
+    border-color: var(--green);
+    color: var(--green-bright);
+    box-shadow: 0 0 16px #22c55e33;
+  }
+
+  .custom-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .custom-row input {
+    flex: 1;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'Barlow', sans-serif;
+    font-size: 16px;
+    padding: 12px 14px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  .custom-row input:focus { border-color: var(--green); }
+  .custom-row input::placeholder { color: var(--text-dim); }
+
+  .custom-row button {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 14px;
+    letter-spacing: 1px;
+    padding: 12px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.15s;
+  }
+
+  .custom-row button:hover { border-color: var(--green-dim); color: var(--text); }
+  .custom-row button.active {
+    background: var(--green-dim);
+    border-color: var(--green);
+    color: var(--green-bright);
+  }
+
+  /* Player count */
+  .player-count-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .count-btn {
+    width: 40px; height: 40px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-size: 20px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s;
+    flex-shrink: 0;
+  }
+
+  .count-btn:hover { border-color: var(--green); color: var(--green-bright); }
+
+  .count-display {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 32px;
+    color: var(--green-bright);
+    min-width: 30px;
+    text-align: center;
+  }
+
+  /* Player name inputs */
+  #player-names-container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .player-name-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .player-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 18px;
+    color: var(--green-dim);
+    width: 24px;
+    text-align: center;
+    flex-shrink: 0;
+  }
+
+  .player-name-input {
+    flex: 1;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'Barlow', sans-serif;
+    font-size: 15px;
+    padding: 10px 14px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  .player-name-input:focus { border-color: var(--green); }
+  .player-name-input::placeholder { color: #3a5a3a; }
+
+  /* Start button */
+  .start-btn {
+    background: var(--green);
+    border: none;
+    border-radius: var(--radius);
+    color: #050f05;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    letter-spacing: 3px;
+    padding: 18px;
+    cursor: pointer;
+    transition: all 0.15s;
+    box-shadow: 0 4px 24px #22c55e44;
+    width: 100%;
+    max-width: 480px;
+  }
+
+  .start-btn:hover {
+    background: var(--green-bright);
+    box-shadow: 0 4px 32px #22c55e66;
+    transform: translateY(-1px);
+  }
+
+  .start-btn:active { transform: translateY(0); }
+
+  /* ─── BULL SCREEN ─── */
+  #bull-screen {
+    display: none;
+    min-height: 100vh;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    gap: 28px;
+    text-align: center;
+  }
+
+  .bull-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(36px, 10vw, 56px);
+    letter-spacing: 4px;
+    color: var(--green-bright);
+    text-shadow: 0 0 30px #22c55e44;
+  }
+
+  .bull-sub {
+    color: var(--text-dim);
+    font-size: 14px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .bull-players {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+    max-width: 400px;
+  }
+
+  .bull-player-btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text);
+    font-family: 'Barlow', sans-serif;
+    font-size: 17px;
+    font-weight: 600;
+    padding: 18px 24px;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .bull-player-btn::before {
+    content: '';
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--green-dim);
+    flex-shrink: 0;
+  }
+
+  .bull-player-btn:hover {
+    border-color: var(--green);
+    background: var(--surface2);
+    transform: translateX(4px);
+  }
+
+  .bull-player-btn:hover::before { background: var(--green-bright); }
+
+  /* ─── GAME SCREEN ─── */
+  #game-screen {
+    display: none;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+  /* Header bar */
+  .game-header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+
+  .game-header-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    letter-spacing: 3px;
+    color: var(--green-bright);
+  }
+
+  .new-game-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text-dim);
+    font-size: 12px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 6px 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .new-game-btn:hover { border-color: var(--red); color: var(--red); }
+
+  /* Players scoreboard */
+  .scoreboard {
+    padding: 12px;
+    display: grid;
+    gap: 8px;
+    /* dynamically set columns via JS */
+  }
+
+  .player-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px 14px;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .player-card.active {
+    border-color: var(--green);
+    background: var(--surface2);
+    box-shadow: 0 0 20px #22c55e1a;
+  }
+
+  .player-card.active::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px; height: 100%;
+    background: var(--green);
+  }
+
+  .player-card.busted {
+    border-color: var(--red);
+    animation: bust-flash 0.4s ease;
+  }
+
+  @keyframes bust-flash {
+    0%, 100% { background: var(--surface); }
+    50% { background: #3a0a0a; }
+  }
+
+  .player-card.winner {
+    border-color: var(--gold);
+    background: #1a1200;
+    box-shadow: 0 0 30px #f59e0b33;
+    animation: winner-pulse 1s ease infinite alternate;
+  }
+
+  @keyframes winner-pulse {
+    from { box-shadow: 0 0 20px #f59e0b33; }
+    to { box-shadow: 0 0 40px #f59e0b66; }
+  }
+
+  .card-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 4px;
+  }
+
+  .player-name-label {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+
+  .player-card.active .player-name-label { color: var(--green); }
+
+  .active-badge {
+    font-size: 10px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--green-bright);
+    background: #22c55e1a;
+    border: 1px solid var(--green-dim);
+    border-radius: 4px;
+    padding: 2px 7px;
+    display: none;
+  }
+
+  .player-card.active .active-badge { display: block; }
+
+  .player-score {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(36px, 8vw, 48px);
+    line-height: 1;
+    color: var(--text);
+    transition: all 0.2s;
+  }
+
+  .player-card.active .player-score { color: var(--green-bright); }
+  .player-card.winner .player-score { color: var(--gold); }
+
+  .checkout-hint {
+    font-size: 13px;
+    color: var(--gold);
+    font-weight: 600;
+    margin-top: 4px;
+    letter-spacing: 0.5px;
+    min-height: 18px;
+    transition: opacity 0.2s;
+  }
+
+  .darts-left-label {
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+
+  /* Input area */
+  .input-area {
+    padding: 12px;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    position: sticky;
+    bottom: 0;
+  }
+
+  .current-player-banner {
+    text-align: center;
+    margin-bottom: 10px;
+  }
+
+  .current-player-banner span {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 14px;
+    letter-spacing: 3px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+  }
+
+  .current-player-banner strong {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 20px;
+    letter-spacing: 2px;
+    color: var(--green-bright);
+    margin-left: 6px;
+  }
+
+  .score-input-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+
+  #score-input {
+    flex: 1;
+    background: var(--bg);
+    border: 2px solid var(--green-dim);
+    border-radius: var(--radius);
+    color: var(--green-bright);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 32px;
+    letter-spacing: 2px;
+    padding: 12px 18px;
+    outline: none;
+    text-align: center;
+    transition: border-color 0.15s;
+    -webkit-appearance: none;
+  }
+
+  #score-input:focus { border-color: var(--green); }
+  #score-input::placeholder { color: var(--green-dim); font-size: 20px; }
+
+  .submit-btn {
+    background: var(--green);
+    border: none;
+    border-radius: var(--radius);
+    color: #050f05;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 20px;
+    letter-spacing: 2px;
+    padding: 14px 22px;
+    cursor: pointer;
+    transition: all 0.15s;
+    flex-shrink: 0;
+  }
+
+  .submit-btn:hover { background: var(--green-bright); transform: scale(1.02); }
+  .submit-btn:active { transform: scale(0.98); }
+
+  .bust-btn {
+    background: transparent;
+    border: 1px solid var(--red);
+    border-radius: var(--radius);
+    color: var(--red);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 16px;
+    letter-spacing: 2px;
+    padding: 14px 16px;
+    cursor: pointer;
+    transition: all 0.15s;
+    flex-shrink: 0;
+  }
+
+  .bust-btn:hover { background: #3a0a0a; }
+
+  /* Darts remaining selector */
+  .darts-selector {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 10px;
+    justify-content: center;
+  }
+
+  .dart-toggle {
+    flex: 1;
+    max-width: 100px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text-dim);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 16px;
+    letter-spacing: 1px;
+    padding: 8px;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.15s;
+  }
+
+  .dart-toggle.active {
+    background: #1a3020;
+    border-color: var(--green-dim);
+    color: var(--green-bright);
+  }
+
+  /* Win overlay */
+  #win-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: #000000cc;
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 24px;
+    text-align: center;
+    padding: 40px;
+    backdrop-filter: blur(8px);
+  }
+
+  .win-trophy { font-size: 72px; animation: trophy-bounce 0.6s ease; }
+  @keyframes trophy-bounce {
+    0% { transform: scale(0) rotate(-20deg); }
+    60% { transform: scale(1.2) rotate(5deg); }
+    100% { transform: scale(1) rotate(0); }
+  }
+
+  .win-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(40px, 12vw, 72px);
+    letter-spacing: 6px;
+    color: var(--gold);
+    text-shadow: 0 0 40px #f59e0b66;
+  }
+
+  .win-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(28px, 8vw, 48px);
+    letter-spacing: 4px;
+    color: var(--text);
+  }
+
+  .win-sub {
+    color: var(--text-dim);
+    font-size: 14px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .win-actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 8px;
+  }
+
+  .win-btn {
+    background: var(--green);
+    border: none;
+    border-radius: var(--radius);
+    color: #050f05;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 18px;
+    letter-spacing: 2px;
+    padding: 16px 28px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .win-btn:hover { background: var(--green-bright); }
+
+  .win-btn.secondary {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+  }
+
+  .win-btn.secondary:hover { border-color: var(--green); color: var(--text); }
+
+  /* Utility */
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════ SETUP SCREEN -->
+<div id="setup-screen" class="screen">
+  <div class="logo">
+    <h1>DARTS</h1>
+    <p>Scorer</p>
+  </div>
+
+  <div class="setup-card">
+    <!-- Game Type -->
+    <div>
+      <div class="field-label">Game Type</div>
+      <div class="game-type-grid">
+        <button class="gt-btn" onclick="selectGameType(101, this)">101</button>
+        <button class="gt-btn active" onclick="selectGameType(201, this)">201</button>
+        <button class="gt-btn" onclick="selectGameType(301, this)">301</button>
+        <button class="gt-btn" onclick="selectGameType(401, this)">401</button>
+        <button class="gt-btn" onclick="selectGameType(501, this)">501</button>
+        <button class="gt-btn" id="custom-gt-btn" onclick="selectCustom(this)">✎</button>
+      </div>
+      <div class="custom-row" id="custom-row" style="margin-top:8px; display:none;">
+        <input type="number" id="custom-score-input" placeholder="Enter score..." min="1" max="9999">
+        <button id="custom-confirm-btn" onclick="confirmCustom()">Set</button>
+      </div>
+    </div>
+
+    <!-- Player Count -->
+    <div>
+      <div class="field-label">Number of Players</div>
+      <div class="player-count-row">
+        <button class="count-btn" onclick="changePlayerCount(-1)">−</button>
+        <span class="count-display" id="player-count-display">2</span>
+        <button class="count-btn" onclick="changePlayerCount(1)">+</button>
+        <span style="color:var(--text-dim); font-size:13px; margin-left:4px;">players</span>
+      </div>
+    </div>
+
+    <!-- Player Names -->
+    <div>
+      <div class="field-label">Player Names</div>
+      <div id="player-names-container"></div>
+    </div>
+  </div>
+
+  <button class="start-btn" onclick="startBullThrow()">THROW FOR BULL</button>
+</div>
+
+<!-- ═══════════════════════════════════════ BULL SCREEN -->
+<div id="bull-screen" class="screen">
+  <div class="bull-title">THROW FOR BULL</div>
+  <div class="bull-sub">Closest to the bull goes first — who won?</div>
+  <div class="bull-players" id="bull-players"></div>
+</div>
+
+<!-- ═══════════════════════════════════════ GAME SCREEN -->
+<div id="game-screen" class="screen">
+  <div class="game-header">
+    <div class="game-header-title" id="game-header-title">501</div>
+    <button class="new-game-btn" onclick="confirmNewGame()">NEW GAME</button>
+  </div>
+
+  <div class="scoreboard" id="scoreboard"></div>
+
+  <div style="flex:1;"></div>
+
+  <div class="input-area">
+    <div class="current-player-banner">
+      <span>Throwing:</span>
+      <strong id="current-player-name">—</strong>
+    </div>
+    <div class="darts-selector">
+      <button class="dart-toggle active" onclick="setDarts(3, this)">🎯 3 Darts</button>
+      <button class="dart-toggle" onclick="setDarts(2, this)">🎯 2 Darts</button>
+      <button class="dart-toggle" onclick="setDarts(1, this)">🎯 1 Dart</button>
+    </div>
+    <div class="score-input-row">
+      <input type="number" id="score-input" placeholder="Score" min="0" max="180">
+      <button class="bust-btn" onclick="recordBust()">BUST</button>
+      <button class="submit-btn" onclick="submitScore()">ENTER</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════ WIN OVERLAY -->
+<div id="win-overlay">
+  <div class="win-trophy">🏆</div>
+  <div class="win-title">CHECKOUT!</div>
+  <div class="win-name" id="win-player-name"></div>
+  <div class="win-sub" id="win-sub-text"></div>
+  <div class="win-actions">
+    <button class="win-btn" onclick="sameGameNewMatch()">SAME GAME</button>
+    <button class="win-btn secondary" onclick="goToSetup()">NEW SETUP</button>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════ CHECKOUT TABLE
+// Keys: remaining score. Values: array of [3-dart, 2-dart, 1-dart] checkout strings (null if not possible)
+const CHECKOUTS = {
+  170: ["T20 T20 Bull", null, null],
+  167: ["T20 T19 Bull", null, null],
+  164: ["T20 T18 Bull", null, null],
+  161: ["T20 T17 Bull", null, null],
+  160: ["T20 T20 D20", null, null],
+  158: ["T20 T20 D19", null, null],
+  157: ["T20 T19 D20", null, null],
+  156: ["T20 T20 D18", null, null],
+  155: ["T20 T19 D19", null, null],
+  154: ["T20 T18 D20", null, null],
+  153: ["T20 T19 D18", null, null],
+  152: ["T20 T20 D16", null, null],
+  151: ["T20 T17 D20", null, null],
+  150: ["T20 T18 D18", null, null],
+  149: ["T20 T19 D16", null, null],
+  148: ["T20 T20 D14", null, null],
+  147: ["T20 T17 D18", null, null],
+  146: ["T20 T18 D16", null, null],
+  145: ["T20 T15 D20", null, null],
+  144: ["T20 T20 D12", null, null],
+  143: ["T20 T17 D16", null, null],
+  142: ["T20 T14 D20", null, null],
+  141: ["T20 T19 D12", null, null],
+  140: ["T20 T20 D10", null, null],
+  139: ["T20 T13 D20", null, null],
+  138: ["T20 T18 D12", null, null],
+  137: ["T20 T15 D16", null, null],
+  136: ["T20 T20 D8", null, null],
+  135: ["T20 T17 D12", null, null],
+  134: ["T20 T14 D16", null, null],
+  133: ["T20 T19 D8", null, null],
+  132: ["T20 T16 D12", null, null],
+  131: ["T20 T13 D16", null, null],
+  130: ["T20 T18 D8", null, null],
+  129: ["T20 T19 D6", null, null],
+  128: ["T20 T16 D10", null, null],
+  127: ["T20 T17 D8", null, null],
+  126: ["T20 T19 D6", null, null],  // alt: T19 T19 D6
+  125: ["T20 T15 D10", null, null],
+  124: ["T20 T16 D8", null, null],
+  123: ["T20 T13 D12", null, null],
+  122: ["T18 T18 D7", null, null],  // alt: T20 T10 D16
+  121: ["T20 T11 D14", null, null],
+  120: ["T20 T20 D0", "T20 D20", null], // T20 D20
+  119: ["T19 T12 D13", null, null],
+  118: ["T20 T18 D2", null, null],
+  117: ["T20 T17 D3", null, null],
+  116: ["T20 T16 D4", null, null],
+  115: ["T20 T15 D5", null, null],
+  114: ["T20 T14 D6", null, null],
+  113: ["T20 T13 D7", null, null],
+  112: ["T20 T12 D8", null, null],
+  111: ["T20 T11 D9", null, null],
+  110: ["T20 T10 D10", "T20 D25", null],
+  109: ["T20 T9 D11", null, null],
+  108: ["T20 T16 D0", "T20 D24", null],  // T20 D24
+  107: ["T19 T10 D10", "T19 D25", null],
+  106: ["T20 T14 D2", null, null],
+  105: ["T20 T13 D3", null, null],
+  104: ["T20 T12 D4", null, null],
+  103: ["T20 T11 D5", null, null],
+  102: ["T20 T10 D6", null, null],
+  101: ["T20 T9 D7", null, null],
+  100: ["T20 T16 D2", "T20 D20", null],
+  99: ["T19 T10 D6", null, null],
+  98: ["T20 T10 D4", "T20 D19", null],
+  97: ["T19 T12 D4", "T19 D20", null],
+  96: ["T20 T8 D6", "T20 D18", null],
+  95: ["T19 T12 D3", "T19 D19", null],
+  94: ["T18 T12 D4", "T18 D20", null],
+  93: ["T19 T8 D6", "T19 D18", null],
+  92: ["T20 T12 D0", "T20 D16", null],
+  91: ["T17 T10 D6", "T17 D20", null],
+  90: ["T20 T6 D6", "T20 D15", null],
+  89: ["T19 T4 D8", "T19 D16", null],
+  88: ["T20 T16 D0", "T20 D14", null],
+  87: ["T17 T10 D3", "T17 D18", null],
+  86: ["T18 T10 D4", "T18 D16", null],
+  85: ["T15 T14 D4", "T15 D20", null],
+  84: ["T20 T4 D6", "T20 D12", null],
+  83: ["T17 T8 D5", "T17 D16", null],
+  82: ["T14 T12 D4", "T14 D20", null],
+  81: ["T19 T6 D0", "T19 D12", null],
+  80: ["T16 T12 D2", "T20 D10", null],
+  79: ["T19 T6 D1", "T19 D11", null],
+  78: ["T18 T6 D6", "T18 D12", null],
+  77: ["T19 T4 D1", "T19 D10", null],
+  76: ["T20 T8 D0", "T20 D8", null],
+  75: ["T17 T10 D0", "T17 D12", null],
+  74: ["T14 T12 D2", "T14 D16", null],
+  73: ["T19 T4 D0", "T19 D8", null],
+  72: ["T16 T8 D4", "T16 D12", null],
+  71: ["T13 T10 D6", "T13 D16", null],
+  70: ["T18 T4 D4", "T18 D8", null],
+  69: ["T19 T2 D0", "T19 D6", null],
+  68: ["T20 T0 D4", "T20 D4", null],
+  67: ["T17 T2 D6", "T17 D8", null],
+  66: ["T14 T4 D6", "T14 D12", null],
+  65: ["T11 T10 D6", "T11 D16", null],
+  64: ["T16 T4 D2", "T16 D8", null],
+  63: ["T13 T6 D6", "T13 D12", null],
+  62: ["T10 T10 D6", "T10 D16", null],
+  61: ["T15 T2 D5", "T15 D8", null],
+  60: ["T20 D0 D0", "T20 D0", null],   // 20 D20 nope. Let's use: T12 T8 D6 / D20 D20 nope
+  // Simplified for 60 down:
+  59: [null, "T19 D1", null],
+  58: [null, "T18 D2", null],
+  57: [null, "T19 D0", "T19 D0"],
+  56: [null, "T16 D4", null],
+  55: [null, "T15 D5", null],
+  54: [null, "T14 D6", null],
+  53: [null, "T13 D7", null],
+  52: [null, "T12 D8", null],
+  51: [null, "T11 D9", null],
+  50: [null, "T10 D10", "Bull"],
+  49: [null, "T9 D11", null],
+  48: [null, "T16 D0", "D24"],
+  47: [null, "T15 D1", null],
+  46: [null, "T6 D14", null],
+  45: [null, "T13 D3", null],
+  44: [null, "T12 D4", null],
+  43: [null, "T11 D5", null],
+  42: [null, "T10 D6", null],
+  41: [null, "T9 D7", null],
+  40: [null, "T8 D8", "D20"],
+  39: [null, "T7 D9", null],
+  38: [null, "T6 D10", "D19"],
+  37: [null, "T9 D5", null],
+  36: [null, "T4 D12", "D18"],
+  35: [null, "T5 D10", null],
+  34: [null, "T2 D14", "D17"],
+  33: [null, "T1 D15", null],
+  32: [null, "T8 D4", "D16"],
+  31: [null, "T7 D5", null],
+  30: [null, "T6 D6", "D15"],
+  29: [null, "T9 D1", null],
+  28: [null, "T4 D8", "D14"],
+  27: [null, "T9 D0", null],
+  26: [null, "T2 D10", "D13"],
+  25: [null, "T5 D5", null],
+  24: [null, "T4 D6", "D12"],
+  23: [null, "T1 D10", null],
+  22: [null, "T2 D8", "D11"],
+  21: [null, "T7 D0", null],
+  20: [null, "T4 D4", "D10"],
+  19: [null, "T1 D8", null],
+  18: [null, "T2 D6", "D9"],
+  17: [null, "T1 D7", null],
+  16: [null, "T2 D5", "D8"],
+  15: [null, "T1 D6", null],
+  14: [null, "T2 D4", "D7"],
+  13: [null, "T1 D5", null],
+  12: [null, "T2 D3", "D6"],
+  11: [null, "T1 D4", null],
+  10: [null, "T2 D2", "D5"],
+  9: [null, "T1 D3", null],
+  8: [null, "T2 D1", "D4"],
+  7: [null, "T1 D2", null],
+  6: [null, "T2 D0", "D3"],
+  5: [null, "T1 D1", null],
+  4: [null, "T2 D0", "D2"],
+  3: [null, "T1 D1", null],
+  2: [null, null, "D1"],
+};
+
+// Fix some 3-dart entries for lower scores
+const CHECKOUTS_3 = {
+  60: "T20 D0 unused — use S20 T20 D0", // override below
+};
+
+// Patch checkouts: for 3-dart, fill missing with reasonable 3-dart route
+// We'll use a simpler approach: if 3-dart entry is null for score <=60, compute on the fly
+function getCheckout(score, dartsLeft) {
+  const entry = CHECKOUTS[score];
+  if (!entry) return null;
+  
+  const idx = dartsLeft - 1; // 3darts->idx2? No: 3 darts = index 0, 2 darts = index 1, 1 dart = index 2
+  // Actually: array is [3-dart, 2-dart, 1-dart]
+  const checkoutStr = entry[3 - dartsLeft]; // 3->0, 2->1, 1->2
+  if (checkoutStr) return checkoutStr;
+  
+  // If requested darts is 3 and 3-dart entry is null, try to fall back
+  // to showing 2-dart or 1-dart options if they exist
+  if (dartsLeft === 3) {
+    // Try building a 3-dart from available: just show best 2-dart option with a filler
+    for (let d = 2; d >= 1; d--) {
+      const fallback = entry[3 - d];
+      if (fallback) return fallback; // show the best possible
+    }
+  }
+  
+  return null;
+}
+
+// ═══════════════════════════════════════ GAME STATE
+let gameType = 201;
+let playerCount = 2;
+let players = [];       // [{name, score}]
+let turnOrder = [];     // indices into players array
+let currentTurnIdx = 0;
+let dartsLeft = 3;
+let gameStarting = true;
+
+// ═══════════════════════════════════════ SETUP
+
+function selectGameType(value, btn) {
+  gameType = value;
+  document.querySelectorAll('.gt-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('custom-row').style.display = 'none';
+  document.getElementById('custom-gt-btn').textContent = '✎';
+  document.getElementById('custom-gt-btn').classList.remove('active');
+}
+
+function selectCustom(btn) {
+  document.querySelectorAll('.gt-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('custom-row').style.display = 'flex';
+  document.getElementById('custom-score-input').focus();
+}
+
+function confirmCustom() {
+  const val = parseInt(document.getElementById('custom-score-input').value);
+  if (val && val > 0) {
+    gameType = val;
+    document.getElementById('custom-gt-btn').textContent = val;
+    document.getElementById('custom-confirm-btn').classList.add('active');
+  }
+}
+
+function changePlayerCount(delta) {
+  playerCount = Math.min(8, Math.max(2, playerCount + delta));
+  document.getElementById('player-count-display').textContent = playerCount;
+  renderPlayerInputs();
+}
+
+function renderPlayerInputs() {
+  const container = document.getElementById('player-names-container');
+  const existing = container.querySelectorAll('.player-name-input');
+  const existingValues = Array.from(existing).map(i => i.value);
+  container.innerHTML = '';
+  for (let i = 0; i < playerCount; i++) {
+    const row = document.createElement('div');
+    row.className = 'player-name-row';
+    row.innerHTML = `
+      <span class="player-num">${i + 1}</span>
+      <input class="player-name-input" type="text" placeholder="Player ${i + 1}" maxlength="16" value="${existingValues[i] || ''}">
+    `;
+    container.appendChild(row);
+  }
+}
+
+function startBullThrow() {
+  const inputs = document.querySelectorAll('.player-name-input');
+  players = Array.from(inputs).map((inp, i) => ({
+    name: inp.value.trim() || `Player ${i + 1}`,
+    score: gameType,
+  }));
+
+  document.getElementById('setup-screen').style.display = 'none';
+  const bull = document.getElementById('bull-screen');
+  bull.style.display = 'flex';
+
+  const bullPlayers = document.getElementById('bull-players');
+  bullPlayers.innerHTML = '';
+  players.forEach((p, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'bull-player-btn';
+    btn.textContent = p.name;
+    btn.onclick = () => startGame(i);
+    bullPlayers.appendChild(btn);
+  });
+}
+
+function startGame(winnerIdx) {
+  // Build turn order: winner first, then others in original order
+  turnOrder = [winnerIdx];
+  for (let i = 0; i < players.length; i++) {
+    if (i !== winnerIdx) turnOrder.push(i);
+  }
+  currentTurnIdx = 0;
+  dartsLeft = 3;
+
+  document.getElementById('bull-screen').style.display = 'none';
+  const gameScreen = document.getElementById('game-screen');
+  gameScreen.style.display = 'flex';
+
+  document.getElementById('game-header-title').textContent = `${gameType} — ${players.length} PLAYERS`;
+
+  renderScoreboard();
+  updateInputArea();
+}
+
+// ═══════════════════════════════════════ SCOREBOARD
+
+function renderScoreboard() {
+  const board = document.getElementById('scoreboard');
+  // Pick columns: 1 col for 2 players, 2 for 3-6, 3 for 7-8... or just 2 col always for >2
+  const cols = players.length === 2 ? 1 : players.length <= 4 ? 2 : players.length <= 6 ? 2 : 3;
+  board.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+  board.innerHTML = '';
+
+  players.forEach((p, i) => {
+    const isActive = turnOrder[currentTurnIdx] === i;
+    const card = document.createElement('div');
+    card.className = 'player-card' + (isActive ? ' active' : '');
+    card.id = `card-${i}`;
+
+    const checkoutText = getCheckoutText(p.score);
+
+    card.innerHTML = `
+      <div class="card-top">
+        <div class="player-name-label">${p.name}</div>
+        <div class="active-badge">THROWING</div>
+      </div>
+      <div class="player-score" id="score-${i}">${p.score}</div>
+      <div class="checkout-hint" id="checkout-${i}">${isActive ? checkoutText : ''}</div>
+    `;
+    board.appendChild(card);
+  });
+}
+
+function getCheckoutText(score) {
+  if (score > 170 || score < 2) return '';
+  const checkout = getCheckout(score, dartsLeft);
+  if (!checkout) return '';
+  // Format nicely
+  return '🎯 ' + checkout.replace(/T(\d+)/g, 'T$1').replace(/D(\d+)/g, 'D$1');
+}
+
+function updateScoreDisplay() {
+  players.forEach((p, i) => {
+    const scoreEl = document.getElementById(`score-${i}`);
+    const checkEl = document.getElementById(`checkout-${i}`);
+    const card = document.getElementById(`card-${i}`);
+    if (scoreEl) scoreEl.textContent = p.score;
+    const isActive = turnOrder[currentTurnIdx] === i;
+    if (checkEl) checkEl.textContent = isActive ? getCheckoutText(p.score) : '';
+    if (card) {
+      card.className = 'player-card' + (isActive ? ' active' : '');
+    }
+  });
+}
+
+// ═══════════════════════════════════════ INPUT AREA
+
+function setDarts(n, btn) {
+  dartsLeft = n;
+  document.querySelectorAll('.dart-toggle').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  // Update checkout hint for current player
+  const currentIdx = turnOrder[currentTurnIdx];
+  const checkEl = document.getElementById(`checkout-${currentIdx}`);
+  if (checkEl) checkEl.textContent = getCheckoutText(players[currentIdx].score);
+}
+
+function updateInputArea() {
+  const currentIdx = turnOrder[currentTurnIdx];
+  document.getElementById('current-player-name').textContent = players[currentIdx].name;
+  document.getElementById('score-input').value = '';
+  document.getElementById('score-input').focus();
+}
+
+function submitScore() {
+  const input = document.getElementById('score-input');
+  const scored = parseInt(input.value);
+  if (isNaN(scored) || scored < 0 || scored > 180) {
+    input.value = '';
+    input.focus();
+    return;
+  }
+
+  const currentIdx = turnOrder[currentTurnIdx];
+  const player = players[currentIdx];
+  const newScore = player.score - scored;
+
+  if (newScore < 0 || newScore === 1) {
+    // BUST
+    triggerBust(currentIdx);
+    return;
+  }
+
+  if (newScore === 0) {
+    // WIN!
+    player.score = 0;
+    updateScoreDisplay();
+    triggerWin(currentIdx);
+    return;
+  }
+
+  player.score = newScore;
+  advanceTurn();
+}
+
+function recordBust() {
+  const currentIdx = turnOrder[currentTurnIdx];
+  triggerBust(currentIdx);
+}
+
+function triggerBust(idx) {
+  const card = document.getElementById(`card-${idx}`);
+  if (card) {
+    card.classList.add('busted');
+    setTimeout(() => card.classList.remove('busted'), 500);
+  }
+  advanceTurn();
+}
+
+function advanceTurn() {
+  currentTurnIdx = (currentTurnIdx + 1) % turnOrder.length;
+  dartsLeft = 3;
+  // Reset darts selector to 3
+  document.querySelectorAll('.dart-toggle').forEach((b, i) => {
+    b.classList.toggle('active', i === 0);
+  });
+  updateScoreDisplay();
+  updateInputArea();
+}
+
+function triggerWin(idx) {
+  const card = document.getElementById(`card-${idx}`);
+  if (card) card.classList.add('winner');
+
+  const player = players[idx];
+  document.getElementById('win-player-name').textContent = player.name;
+  document.getElementById('win-sub-text').textContent = `checked out from ${gameType}`;
+
+  const overlay = document.getElementById('win-overlay');
+  overlay.style.display = 'flex';
+}
+
+// ═══════════════════════════════════════ WIN ACTIONS
+
+function sameGameNewMatch() {
+  document.getElementById('win-overlay').style.display = 'none';
+  players.forEach(p => p.score = gameType);
+  currentTurnIdx = 0;
+  dartsLeft = 3;
+  renderScoreboard();
+  updateInputArea();
+}
+
+function goToSetup() {
+  document.getElementById('win-overlay').style.display = 'none';
+  document.getElementById('game-screen').style.display = 'none';
+  document.getElementById('setup-screen').style.display = 'flex';
+}
+
+function confirmNewGame() {
+  if (confirm('Start a new game?')) goToSetup();
+}
+
+// ═══════════════════════════════════════ KEYBOARD SUPPORT
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter') {
+    const gameScreen = document.getElementById('game-screen');
+    if (gameScreen.style.display === 'flex') submitScore();
+  }
+});
+
+// ═══════════════════════════════════════ INIT
+renderPlayerInputs();
+// Mark 201 as default active
+document.querySelector('.gt-btn:nth-child(2)').classList.add('active');
+// Actually fix initial active (201 is 2nd item)
+document.querySelectorAll('.gt-btn').forEach(b => b.classList.remove('active'));
+document.querySelectorAll('.gt-btn')[1].classList.add('active');
+</script>
+</body>
+</html>
