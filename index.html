@@ -260,6 +260,21 @@
   .num-btn.enter-btn:active { background: var(--green-bright); }
   .num-btn.del-btn { color: var(--text-dim); font-size: 20px; }
 
+  /* Quick score buttons */
+  .quick-scores {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 5px;
+    margin-bottom: 6px;
+  }
+  .quick-btn {
+    background: #1a3020; border: 1px solid var(--green-dim); border-radius: 8px;
+    color: var(--green-bright); font-family: 'Bebas Neue', sans-serif; font-size: 20px;
+    letter-spacing: 1px; padding: 10px 4px; cursor: pointer; text-align: center;
+    -webkit-user-select: none; user-select: none; transition: transform 0.08s;
+  }
+  .quick-btn:active { background: var(--green-dim); border-color: var(--green); transform: scale(0.93); }
+
   /* ── WIN OVERLAY ── */
   #win-overlay {
     display: none; position: fixed; inset: 0; background: #000000dd; z-index: 100;
@@ -291,6 +306,36 @@
   .win-btn:active { background: var(--green-bright); }
   .win-btn.secondary { background: transparent; border: 1px solid var(--border); color: var(--text-dim); }
   .win-btn.secondary:active { border-color: var(--green); color: var(--text); }
+  /* ── CHECKOUT DARTS OVERLAY ── */
+  #checkout-overlay {
+    display: none; position: fixed; inset: 0; background: #000000ee; z-index: 200;
+    align-items: center; justify-content: center; backdrop-filter: blur(8px);
+  }
+  .checkout-prompt {
+    background: var(--surface); border: 1px solid var(--green); border-radius: var(--radius);
+    padding: 28px 24px; width: 90%; max-width: 340px; text-align: center;
+    box-shadow: 0 0 40px #22c55e33;
+  }
+  .checkout-prompt-title {
+    font-family: 'Bebas Neue', sans-serif; font-size: 32px; letter-spacing: 4px;
+    color: var(--gold); margin-bottom: 4px;
+  }
+  .checkout-prompt-name {
+    font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 3px;
+    color: var(--green-bright); margin-bottom: 10px;
+  }
+  .checkout-prompt-sub {
+    font-size: 13px; letter-spacing: 1px; text-transform: uppercase;
+    color: var(--text-dim); margin-bottom: 20px;
+  }
+  .checkout-dart-btns { display: flex; gap: 10px; }
+  .checkout-dart-btn {
+    flex: 1; background: var(--surface2); border: 1px solid var(--border); border-radius: 10px;
+    color: var(--text); font-family: 'Bebas Neue', sans-serif; font-size: 18px;
+    letter-spacing: 1px; padding: 14px 4px; cursor: pointer; transition: all 0.12s;
+  }
+  .checkout-dart-btn:hover { border-color: var(--green); color: var(--green-bright); background: var(--green-dim); }
+  .checkout-dart-btn:active { transform: scale(0.95); }
 </style>
 </head>
 <body>
@@ -376,23 +421,29 @@
       <span>Throwing:</span>
       <strong id="current-player-name">—</strong>
     </div>
+    <div class="quick-scores">
+      <button class="quick-btn" ontouchstart="quickScore(60)" onclick="quickScore(60)">60</button>
+      <button class="quick-btn" ontouchstart="quickScore(100)" onclick="quickScore(100)">100</button>
+      <button class="quick-btn" ontouchstart="quickScore(140)" onclick="quickScore(140)">140</button>
+      <button class="quick-btn" ontouchstart="quickScore(180)" onclick="quickScore(180)">180</button>
+    </div>
     <div class="score-display-row">
       <div class="score-display" id="score-display">—</div>
       <button class="bust-btn" onclick="recordBust()">BUST</button>
     </div>
     <div class="numpad">
-      <button class="num-btn" ontouchstart="numPress(7)">7</button>
-      <button class="num-btn" ontouchstart="numPress(8)">8</button>
-      <button class="num-btn" ontouchstart="numPress(9)">9</button>
-      <button class="num-btn" ontouchstart="numPress(4)">4</button>
-      <button class="num-btn" ontouchstart="numPress(5)">5</button>
-      <button class="num-btn" ontouchstart="numPress(6)">6</button>
-      <button class="num-btn" ontouchstart="numPress(1)">1</button>
-      <button class="num-btn" ontouchstart="numPress(2)">2</button>
-      <button class="num-btn" ontouchstart="numPress(3)">3</button>
-      <button class="num-btn del-btn" ontouchstart="numDel()">⌫</button>
-      <button class="num-btn" ontouchstart="numPress(0)">0</button>
-      <button class="num-btn enter-btn" ontouchstart="submitScore()">ENTER</button>
+      <button class="num-btn" ontouchstart="numPress(7)" onclick="numPress(7)">7</button>
+      <button class="num-btn" ontouchstart="numPress(8)" onclick="numPress(8)">8</button>
+      <button class="num-btn" ontouchstart="numPress(9)" onclick="numPress(9)">9</button>
+      <button class="num-btn" ontouchstart="numPress(4)" onclick="numPress(4)">4</button>
+      <button class="num-btn" ontouchstart="numPress(5)" onclick="numPress(5)">5</button>
+      <button class="num-btn" ontouchstart="numPress(6)" onclick="numPress(6)">6</button>
+      <button class="num-btn" ontouchstart="numPress(1)" onclick="numPress(1)">1</button>
+      <button class="num-btn" ontouchstart="numPress(2)" onclick="numPress(2)">2</button>
+      <button class="num-btn" ontouchstart="numPress(3)" onclick="numPress(3)">3</button>
+      <button class="num-btn del-btn" ontouchstart="numDel()" onclick="numDel()">⌫</button>
+      <button class="num-btn" ontouchstart="numPress(0)" onclick="numPress(0)">0</button>
+      <button class="num-btn enter-btn" ontouchstart="submitScore()" onclick="submitScore()">ENTER</button>
     </div>
   </div>
 </div>
@@ -406,6 +457,20 @@
   <div class="win-actions">
     <button class="win-btn" id="win-next-btn">NEXT LEG</button>
     <button class="win-btn secondary" onclick="goToSetup()">NEW SETUP</button>
+  </div>
+</div>
+
+<!-- ═══════════════ CHECKOUT DARTS PROMPT -->
+<div id="checkout-overlay">
+  <div class="checkout-prompt">
+    <div class="checkout-prompt-title">CHECKOUT!</div>
+    <div class="checkout-prompt-name" id="checkout-prompt-name"></div>
+    <div class="checkout-prompt-sub">How many darts to finish?</div>
+    <div class="checkout-dart-btns">
+      <button class="checkout-dart-btn" onclick="confirmCheckout(1)">1 DART</button>
+      <button class="checkout-dart-btn" onclick="confirmCheckout(2)">2 DARTS</button>
+      <button class="checkout-dart-btn" onclick="confirmCheckout(3)">3 DARTS</button>
+    </div>
   </div>
 </div>
 
@@ -617,6 +682,12 @@ function updateScoreDisplay() {
 }
 
 // ═══ NUMPAD
+function quickScore(val) {
+  currentInput = String(val);
+  refreshDisplay();
+  submitScore();
+}
+
 function numPress(d) {
   if (currentInput.length >= 3) return;
   currentInput += d;
@@ -639,6 +710,9 @@ function updateInputArea() {
 }
 
 // ═══ SCORING
+let pendingCheckoutIdx = -1;
+let pendingCheckoutScored = 0;
+
 function submitScore() {
   if (currentInput === '') return;
   const scored = parseInt(currentInput);
@@ -650,17 +724,35 @@ function submitScore() {
 
   if (newScore < 0 || newScore === 1) { triggerBust(idx, false); return; }
 
+  if (newScore === 0) {
+    // Ask how many darts for the checkout
+    pendingCheckoutIdx = idx;
+    pendingCheckoutScored = scored;
+    currentInput = '';
+    refreshDisplay();
+    document.getElementById('checkout-prompt-name').textContent = p.name;
+    document.getElementById('checkout-overlay').style.display = 'flex';
+    return;
+  }
+
   p.score = newScore;
   p.legDarts += 3; p.legScored += scored;
   p.totalDarts += 3; p.totalScored += scored;
-
-  if (newScore === 0) {
-    p.legsWon++;
-    updateScoreDisplay();
-    checkWin(idx);
-    return;
-  }
   advanceTurn();
+}
+
+function confirmCheckout(darts) {
+  document.getElementById('checkout-overlay').style.display = 'none';
+  const idx = pendingCheckoutIdx;
+  const p = players[idx];
+  p.score = 0;
+  // Count all darts in this visit: previous throws this visit were 3 minus remaining
+  // We don't track per-visit, so just record how many darts they actually used
+  p.legDarts += darts; p.legScored += pendingCheckoutScored;
+  p.totalDarts += darts; p.totalScored += pendingCheckoutScored;
+  p.legsWon++;
+  updateScoreDisplay();
+  checkWin(idx);
 }
 
 function recordBust() {
@@ -754,6 +846,22 @@ function confirmNewGame() { if (confirm('Start a new game?')) goToSetup(); }
 
 // ═══ INIT
 renderPlayerInputs();
+
+// Keyboard support for desktop
+document.addEventListener('keydown', e => {
+  const gameScreen = document.getElementById('game-screen');
+  const checkoutOverlay = document.getElementById('checkout-overlay');
+  if (gameScreen.style.display !== 'flex') return;
+  if (checkoutOverlay.style.display === 'flex') {
+    if (e.key === '1') confirmCheckout(1);
+    if (e.key === '2') confirmCheckout(2);
+    if (e.key === '3') confirmCheckout(3);
+    return;
+  }
+  if (e.key >= '0' && e.key <= '9') { e.preventDefault(); numPress(parseInt(e.key)); }
+  if (e.key === 'Backspace') { e.preventDefault(); numDel(); }
+  if (e.key === 'Enter') { e.preventDefault(); submitScore(); }
+});
 </script>
 </body>
 </html>
