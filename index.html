@@ -421,30 +421,12 @@
       <span>Throwing:</span>
       <strong id="current-player-name">—</strong>
     </div>
-    <div class="quick-scores">
-      <button class="quick-btn" ontouchstart="quickScore(60)" onclick="quickScore(60)">60</button>
-      <button class="quick-btn" ontouchstart="quickScore(100)" onclick="quickScore(100)">100</button>
-      <button class="quick-btn" ontouchstart="quickScore(140)" onclick="quickScore(140)">140</button>
-      <button class="quick-btn" ontouchstart="quickScore(180)" onclick="quickScore(180)">180</button>
-    </div>
+    <div class="quick-scores" id="quick-scores"></div>
     <div class="score-display-row">
       <div class="score-display" id="score-display">—</div>
       <button class="bust-btn" onclick="recordBust()">BUST</button>
     </div>
-    <div class="numpad">
-      <button class="num-btn" ontouchstart="numPress(7)" onclick="numPress(7)">7</button>
-      <button class="num-btn" ontouchstart="numPress(8)" onclick="numPress(8)">8</button>
-      <button class="num-btn" ontouchstart="numPress(9)" onclick="numPress(9)">9</button>
-      <button class="num-btn" ontouchstart="numPress(4)" onclick="numPress(4)">4</button>
-      <button class="num-btn" ontouchstart="numPress(5)" onclick="numPress(5)">5</button>
-      <button class="num-btn" ontouchstart="numPress(6)" onclick="numPress(6)">6</button>
-      <button class="num-btn" ontouchstart="numPress(1)" onclick="numPress(1)">1</button>
-      <button class="num-btn" ontouchstart="numPress(2)" onclick="numPress(2)">2</button>
-      <button class="num-btn" ontouchstart="numPress(3)" onclick="numPress(3)">3</button>
-      <button class="num-btn del-btn" ontouchstart="numDel()" onclick="numDel()">⌫</button>
-      <button class="num-btn" ontouchstart="numPress(0)" onclick="numPress(0)">0</button>
-      <button class="num-btn enter-btn" ontouchstart="submitScore()" onclick="submitScore()">ENTER</button>
-    </div>
+    <div class="numpad" id="numpad"></div>
   </div>
 </div>
 
@@ -846,6 +828,50 @@ function confirmNewGame() { if (confirm('Start a new game?')) goToSetup(); }
 
 // ═══ INIT
 renderPlayerInputs();
+
+// Build numpad — use touchstart on touch devices, click on desktop, never both
+(function buildNumpad() {
+  const keys = [
+    {label:'7', action:()=>numPress(7)},
+    {label:'8', action:()=>numPress(8)},
+    {label:'9', action:()=>numPress(9)},
+    {label:'4', action:()=>numPress(4)},
+    {label:'5', action:()=>numPress(5)},
+    {label:'6', action:()=>numPress(6)},
+    {label:'1', action:()=>numPress(1)},
+    {label:'2', action:()=>numPress(2)},
+    {label:'3', action:()=>numPress(3)},
+    {label:'⌫', action:numDel, cls:'del-btn'},
+    {label:'0', action:()=>numPress(0)},
+    {label:'ENTER', action:submitScore, cls:'enter-btn'},
+  ];
+  const pad = document.getElementById('numpad');
+  const isTouchDevice = ('ontouchstart' in window);
+  keys.forEach(k => {
+    const btn = document.createElement('button');
+    btn.className = 'num-btn' + (k.cls ? ' '+k.cls : '');
+    btn.textContent = k.label;
+    if (isTouchDevice) {
+      btn.addEventListener('touchstart', e => { e.preventDefault(); k.action(); }, {passive:false});
+    } else {
+      btn.addEventListener('click', k.action);
+    }
+    pad.appendChild(btn);
+  });
+  // Build quick score buttons the same way
+  const quickScoreContainer = document.getElementById('quick-scores');
+  [60, 100, 140, 180].forEach(val => {
+    const btn = document.createElement('button');
+    btn.className = 'quick-btn';
+    btn.textContent = val;
+    if (isTouchDevice) {
+      btn.addEventListener('touchstart', e => { e.preventDefault(); quickScore(val); }, {passive:false});
+    } else {
+      btn.addEventListener('click', () => quickScore(val));
+    }
+    quickScoreContainer.appendChild(btn);
+  });
+})();
 
 // Keyboard support for desktop
 document.addEventListener('keydown', e => {
