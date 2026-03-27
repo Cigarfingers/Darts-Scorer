@@ -193,22 +193,24 @@
     min-height: 0;
   }
 
-  /* Active player zone — grows to fill available space */
+  /* Active player zone — grows to fill available space, never shrinks below min */
   .scoreboard-active-zone {
     flex: 1;
+    min-height: 160px;
     padding: 8px 8px 4px;
-    min-height: 0;
     display: flex;
     flex-direction: column;
   }
 
-  /* Inactive players zone — compact, fixed at bottom of scoreboard */
+  /* Inactive players zone — compact rows, scrollable if needed */
   .scoreboard-inactive-zone {
     padding: 0 8px 6px;
     display: flex;
     flex-direction: column;
     gap: 4px;
     flex-shrink: 0;
+    max-height: 55vh;
+    overflow-y: auto;
   }
 
   /* ── ACTIVE PLAYER CARD ── */
