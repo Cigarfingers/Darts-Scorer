@@ -211,6 +211,8 @@
     flex-direction: column;
     gap: 4px;
     flex-shrink: 0;
+    position: relative;
+    z-index: 1;
   }
 
   /* ── ACTIVE PLAYER CARD ── */
@@ -231,7 +233,9 @@
     justify-content: space-between;
     align-items: center;
     text-align: center;
-    overflow: visible;
+    overflow: hidden;
+    position: relative;
+    z-index: 2;
   }
   .player-card.active::before {
     content: ''; position: absolute; top: 0; left: 0; right: 0;
@@ -374,6 +378,14 @@
     -webkit-user-select: none; user-select: none; transition: transform 0.08s;
   }
   .quick-btn:active { background: var(--green-dim); border-color: var(--green); transform: scale(0.93); }
+
+  /* iPad landscape — give active zone more breathing room */
+  @media (orientation: landscape) and (min-height: 500px) {
+    .scoreboard-active-zone {
+      height: 42dvh;
+      min-height: 200px;
+    }
+  }
 
   /* ── LANDSCAPE LAYOUT ── */
   @media (orientation: landscape) and (max-height: 500px) {
@@ -838,7 +850,7 @@ function renderScoreboard() {
         '<div class="inactive-avg">AVG<strong id="avg-' + i + '">' + legAvg + '</strong></div>' +
         '<div class="inactive-score" id="score-' + i + '">' + p.score + '</div>' +
         (legsStr ? '<div class="inactive-legs">' + legsStr + '</div>' : '') +
-        '<div class="checkout-hint" id="co-' + i + '" style="margin-left:8px;min-height:auto;font-size:11px"></div>';
+        ''; // no checkout hint on inactive cards
       inactiveZone.appendChild(card);
     });
     board.appendChild(inactiveZone);
