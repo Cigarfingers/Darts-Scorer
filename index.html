@@ -175,31 +175,74 @@
   }
   .new-game-btn:active { border-color: var(--red); color: var(--red); }
 
+  /* ── TWO-ZONE SCOREBOARD ── */
   .scoreboard {
     flex: 1;
-    padding: 8px;
-    display: grid;
-    gap: 6px;
-    overflow-y: auto;
-    align-content: start;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
     min-height: 0;
   }
 
+  /* Active player zone — grows to fill available space */
+  .scoreboard-active-zone {
+    flex: 1;
+    padding: 8px 8px 4px;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Inactive players zone — compact, fixed at bottom of scoreboard */
+  .scoreboard-inactive-zone {
+    padding: 0 8px 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex-shrink: 0;
+  }
+
+  /* ── ACTIVE PLAYER CARD ── */
   .player-card {
     background: var(--surface); border: 1px solid var(--border);
     border-radius: var(--radius); padding: 8px 12px;
-    transition: border-color 0.2s; position: relative; overflow: hidden;
+    transition: border-color 0.2s, background 0.2s; position: relative; overflow: hidden;
   }
-  .player-card.active { border-color: var(--green); background: var(--surface2); box-shadow: 0 0 16px #22c55e18; }
-  .player-card.active::before { content: ''; position: absolute; top: 0; left: 0; width: 3px; height: 100%; background: var(--green); }
+
+  /* Active card fills the active zone */
+  .player-card.active {
+    flex: 1;
+    border-color: var(--green);
+    background: var(--surface2);
+    box-shadow: 0 0 24px #22c55e1a;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  .player-card.active::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0;
+    height: 3px; background: linear-gradient(90deg, transparent, var(--green), transparent);
+  }
+
+  /* Inactive cards are compact rows */
+  .player-card.inactive {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 12px;
+    opacity: 0.7;
+  }
+  .player-card.inactive:hover { opacity: 0.9; }
+
   .player-card.busted { border-color: var(--red); animation: bust-flash 0.4s ease; }
   @keyframes bust-flash { 0%,100% { background: var(--surface); } 50% { background: #3a0a0a; } }
   .player-card.winner { border-color: var(--gold); background: #1a1200; animation: winner-pulse 1s ease infinite alternate; }
   @keyframes winner-pulse { from { box-shadow: 0 0 16px #f59e0b33; } to { box-shadow: 0 0 32px #f59e0b66; } }
 
-  .card-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2px; }
+  /* Active card internals */
+  .card-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
   .player-name-label { font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--text-dim); }
-  .player-card.active .player-name-label { color: var(--green); }
+  .player-card.active .player-name-label { font-size: 13px; color: var(--green); }
 
   .card-top-right { display: flex; align-items: center; gap: 8px; }
   .active-badge {
@@ -208,17 +251,39 @@
     padding: 2px 6px; display: none;
   }
   .player-card.active .active-badge { display: block; }
+
+  /* Avg — bigger on active card */
   .avg-display { font-size: 11px; color: var(--text-dim); }
   .avg-display strong { color: var(--text); }
+  .player-card.active .avg-display { font-size: 14px; }
+  .player-card.active .avg-display strong { color: var(--green-bright); font-size: 16px; }
 
+  /* Score — huge on active card */
   .card-bottom { display: flex; align-items: flex-end; justify-content: space-between; }
-  .player-score { font-family: 'Bebas Neue', sans-serif; font-size: clamp(38px, 9vw, 52px); line-height: 1; color: var(--text); }
-  .player-card.active .player-score { color: var(--green-bright); }
+  .player-score {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(38px, 9vw, 52px);
+    line-height: 1; color: var(--text);
+  }
+  .player-card.active .player-score {
+    font-size: clamp(72px, 18vw, 110px);
+    color: var(--green-bright);
+    text-shadow: 0 0 40px #22c55e33;
+  }
   .player-card.winner .player-score { color: var(--gold); }
 
   .card-bottom-right { text-align: right; }
   .checkout-hint { font-size: 12px; color: var(--gold); font-weight: 600; min-height: 17px; }
+  .player-card.active .checkout-hint { font-size: 15px; min-height: 22px; }
   .legs-won-badge { font-size: 10px; color: var(--text-dim); letter-spacing: 1px; }
+  .player-card.active .legs-won-badge { font-size: 13px; }
+
+  /* Inactive card internals */
+  .inactive-name { font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--text-dim); flex: 1; }
+  .inactive-score { font-family: 'Bebas Neue', sans-serif; font-size: 28px; color: var(--text); line-height: 1; margin-left: 12px; }
+  .inactive-avg { font-size: 11px; color: var(--text-dim); margin-left: 12px; text-align: right; min-width: 48px; }
+  .inactive-avg strong { color: var(--text); display: block; }
+  .inactive-legs { font-size: 10px; color: var(--text-dim); margin-left: 10px; letter-spacing: 1px; }
 
   /* ── INPUT AREA ── */
   .input-area {
@@ -627,55 +692,68 @@ function currentLeg() {
 
 function renderScoreboard() {
   const board = document.getElementById('scoreboard');
-  const cols = players.length <= 2 ? 1 : 2;
-  board.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
   board.innerHTML = '';
-  players.forEach((p, i) => {
-    const isActive = turnOrder[currentTurnIdx] === i;
-    const card = document.createElement('div');
-    card.className = 'player-card' + (isActive ? ' active' : '');
-    card.id = `card-${i}`;
 
-    const legAvg = p.legDarts > 0 ? ((p.legScored / p.legDarts) * 3).toFixed(1) : '-';
-    const checkout = isActive && p.score >= 2 && p.score <= 170 ? CHECKOUTS[p.score] : null;
-    const legsStr = legsToWin > 1 ? `${p.legsWon} LEG${p.legsWon !== 1 ? 'S' : ''}` : '';
+  const activeIdx = turnOrder[currentTurnIdx];
 
-    card.innerHTML = `
-      <div class="card-top">
-        <div class="player-name-label">${p.name}</div>
-        <div class="card-top-right">
-          <div class="avg-display">AVG <strong id="avg-${i}">${legAvg}</strong></div>
-          <div class="active-badge">NOW</div>
-        </div>
-      </div>
-      <div class="card-bottom">
-        <div class="player-score" id="score-${i}">${p.score}</div>
-        <div class="card-bottom-right">
-          ${legsStr ? `<div class="legs-won-badge">${legsStr}</div>` : ''}
-          <div class="checkout-hint" id="co-${i}">${checkout ? '🎯 '+checkout : ''}</div>
-        </div>
-      </div>`;
-    board.appendChild(card);
-  });
-  document.getElementById('leg-indicator').textContent = `LEG ${currentLeg()}`;
+  // Active zone
+  const activeZone = document.createElement('div');
+  activeZone.className = 'scoreboard-active-zone';
+
+  const ap = players[activeIdx];
+  const activeCard = document.createElement('div');
+  activeCard.className = 'player-card active';
+  activeCard.id = 'card-' + activeIdx;
+  const legAvgA = ap.legDarts > 0 ? ((ap.legScored / ap.legDarts) * 3).toFixed(1) : '-';
+  const checkoutA = ap.score >= 2 && ap.score <= 170 ? CHECKOUTS[ap.score] : null;
+  const legsStrA = legsToWin > 1 ? ap.legsWon + ' LEG' + (ap.legsWon !== 1 ? 'S' : '') : '';
+  activeCard.innerHTML =
+    '<div class="card-top">' +
+      '<div class="player-name-label">' + ap.name + '</div>' +
+      '<div class="card-top-right">' +
+        '<div class="avg-display">AVG <strong id="avg-' + activeIdx + '">' + legAvgA + '</strong></div>' +
+        '<div class="active-badge">NOW</div>' +
+      '</div>' +
+    '</div>' +
+    '<div class="card-bottom">' +
+      '<div class="player-score" id="score-' + activeIdx + '">' + ap.score + '</div>' +
+      '<div class="card-bottom-right">' +
+        (legsStrA ? '<div class="legs-won-badge">' + legsStrA + '</div>' : '') +
+        '<div class="checkout-hint" id="co-' + activeIdx + '">' + (checkoutA ? '🎯 ' + checkoutA : '') + '</div>' +
+      '</div>' +
+    '</div>';
+  activeZone.appendChild(activeCard);
+  board.appendChild(activeZone);
+
+  // Inactive zone
+  const inactivePlayers = players.map(function(p, i) { return {p: p, i: i}; }).filter(function(x) { return x.i !== activeIdx; });
+  if (inactivePlayers.length > 0) {
+    const inactiveZone = document.createElement('div');
+    inactiveZone.className = 'scoreboard-inactive-zone';
+    inactivePlayers.forEach(function(x) {
+      const p = x.p; const i = x.i;
+      const card = document.createElement('div');
+      card.className = 'player-card inactive';
+      card.id = 'card-' + i;
+      const legAvg = p.legDarts > 0 ? ((p.legScored / p.legDarts) * 3).toFixed(1) : '-';
+      const legsStr = legsToWin > 1 ? p.legsWon + ' LEG' + (p.legsWon !== 1 ? 'S' : '') : '';
+      card.innerHTML =
+        '<div class="inactive-name">' + p.name + '</div>' +
+        '<div class="inactive-avg">AVG<strong id="avg-' + i + '">' + legAvg + '</strong></div>' +
+        '<div class="inactive-score" id="score-' + i + '">' + p.score + '</div>' +
+        (legsStr ? '<div class="inactive-legs">' + legsStr + '</div>' : '') +
+        '<div class="checkout-hint" id="co-' + i + '" style="margin-left:8px;min-height:auto;font-size:11px"></div>';
+      inactiveZone.appendChild(card);
+    });
+    board.appendChild(inactiveZone);
+  }
+
+  document.getElementById('leg-indicator').textContent = 'LEG ' + currentLeg();
 }
 
 function updateScoreDisplay() {
-  players.forEach((p, i) => {
-    const isActive = turnOrder[currentTurnIdx] === i;
-    const el = id => document.getElementById(id);
-    if (el(`score-${i}`)) el(`score-${i}`).textContent = p.score;
-    if (el(`avg-${i}`)) {
-      el(`avg-${i}`).textContent = p.legDarts > 0 ? ((p.legScored / p.legDarts) * 3).toFixed(1) : '-';
-    }
-    if (el(`co-${i}`)) {
-      const co = isActive && p.score >= 2 && p.score <= 170 ? CHECKOUTS[p.score] : null;
-      el(`co-${i}`).textContent = co ? '🎯 '+co : '';
-    }
-    const card = el(`card-${i}`);
-    if (card) card.className = 'player-card' + (isActive ? ' active' : '');
-  });
-  document.getElementById('leg-indicator').textContent = `LEG ${currentLeg()}`;
+  // Re-render the whole scoreboard so the active zone swaps correctly
+  renderScoreboard();
 }
 
 // ═══ HISTORY / UNDO
@@ -786,9 +864,16 @@ function recordBust() {
 
 function triggerBust(idx, fromButton) {
   currentInput = '';
-  const card = document.getElementById(`card-${idx}`);
-  if (card) { card.classList.add('busted'); setTimeout(() => card.classList.remove('busted'), 450); }
-  setTimeout(() => advanceTurn(), fromButton ? 0 : 0);
+  const card = document.getElementById('card-' + idx);
+  if (card) {
+    card.classList.add('busted');
+    setTimeout(function() {
+      card.classList.remove('busted');
+      advanceTurn();
+    }, 450);
+  } else {
+    advanceTurn();
+  }
 }
 
 function advanceTurn() {
