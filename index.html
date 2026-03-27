@@ -1081,7 +1081,7 @@ function advanceTurn() {
   var co = next.score >= 2 && next.score <= 170 ? CHECKOUTS[next.score] : null;
   setTimeout(function() {
     if (co) {
-      speak(next.name + '. Require ' + checkoutToWords(co));
+      speak(next.name + '. You require ' + scoreToWords(next.score));
     } else {
       speak(next.name);
     }
