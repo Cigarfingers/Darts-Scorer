@@ -231,6 +231,7 @@
     justify-content: space-between;
     align-items: center;
     text-align: center;
+    overflow: visible;
   }
   .player-card.active::before {
     content: ''; position: absolute; top: 0; left: 0; right: 0;
@@ -278,6 +279,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    overflow: visible;
+    min-height: 0;
   }
   .card-bottom { display: flex; align-items: flex-end; justify-content: center; width: 100%; }
   .player-score {
@@ -371,6 +374,52 @@
     -webkit-user-select: none; user-select: none; transition: transform 0.08s;
   }
   .quick-btn:active { background: var(--green-dim); border-color: var(--green); transform: scale(0.93); }
+
+  /* ── LANDSCAPE LAYOUT ── */
+  @media (orientation: landscape) and (max-height: 500px) {
+    /* Stack game screen horizontally: scoreboard left, input right */
+    #game-screen {
+      flex-direction: row;
+      align-items: stretch;
+    }
+    .game-header {
+      display: none; /* hide header to save space — info is in scoreboard */
+    }
+    .scoreboard {
+      flex: 1;
+      min-width: 0;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    .scoreboard-active-zone {
+      height: auto;
+      flex: 1;
+      min-height: 80px;
+    }
+    .player-card.active .player-score {
+      font-size: clamp(40px, 10vw, 72px);
+    }
+    .player-card.active .player-name-label {
+      font-size: 20px;
+    }
+    .player-card.active .checkout-hint {
+      font-size: 18px;
+      min-height: 22px;
+      margin-top: 2px;
+    }
+    .input-area {
+      width: 52vw;
+      flex-shrink: 0;
+      border-top: none;
+      border-left: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .num-btn { padding: 8px 4px; font-size: 20px; }
+    .quick-btn { padding: 6px 4px; font-size: 16px; }
+    .score-display { min-height: 38px; font-size: 26px; }
+  }
 
   /* ── WIN OVERLAY ── */
   #win-overlay {
