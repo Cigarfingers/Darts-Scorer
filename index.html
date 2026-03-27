@@ -318,7 +318,7 @@
   .input-area {
     background: var(--surface);
     border-top: 1px solid var(--border);
-    padding: 6px 8px 8px;
+    padding: 4px 8px 8px;
     flex-shrink: 0;
   }
 
@@ -570,17 +570,15 @@
       <div class="game-header-title" id="game-header-title">501</div>
       <div class="leg-indicator" id="leg-indicator">LEG 1</div>
     </div>
-    <button class="new-game-btn" onclick="confirmNewGame()">NEW GAME</button>
+    <div style="display:flex;gap:8px;align-items:center">
+      <button class="undo-btn" id="undo-btn" onclick="undoLast()">↩ UNDO</button>
+      <button class="new-game-btn" onclick="confirmNewGame()">NEW GAME</button>
+    </div>
   </div>
 
   <div class="scoreboard" id="scoreboard"></div>
 
   <div class="input-area">
-    <div class="current-player-banner">
-      <button class="undo-btn" id="undo-btn" onclick="undoLast()">↩ UNDO</button>
-      <div><span>Throwing:</span>
-      <strong id="current-player-name">—</strong></div>
-    </div>
     <div class="quick-scores" id="quick-scores"></div>
     <div class="score-display-row">
       <div class="score-display" id="score-display">—</div>
@@ -914,8 +912,6 @@ function refreshDisplay() {
   el.classList.toggle('has-value', currentInput !== '');
 }
 function updateInputArea() {
-  const idx = turnOrder[currentTurnIdx];
-  document.getElementById('current-player-name').textContent = players[idx].name;
   currentInput = '';
   refreshDisplay();
 }
