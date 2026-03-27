@@ -26,6 +26,15 @@
     --text: #e2f5e2;
     --text-dim: #6b9b6b;
     --radius: 12px;
+    /* Player slot colours */
+    --p0-c: #4ade80; --p0-bg: #0f2d1a; --p0-glow: #22c55e22; --p0-bar: #22c55e;
+    --p1-c: #60a5fa; --p1-bg: #0f1a2d; --p1-glow: #3b82f622; --p1-bar: #3b82f6;
+    --p2-c: #fb923c; --p2-bg: #2d1a0f; --p2-glow: #f9741622; --p2-bar: #f97416;
+    --p3-c: #e879f9; --p3-bg: #2a0f2d; --p3-glow: #d946ef22; --p3-bar: #d946ef;
+    --p4-c: #facc15; --p4-bg: #2d2a0f; --p4-glow: #eab30822; --p4-bar: #eab308;
+    --p5-c: #2dd4bf; --p5-bg: #0f2d2a; --p5-glow: #14b8a622; --p5-bar: #14b8a6;
+    --p6-c: #f87171; --p6-bg: #2d0f0f; --p6-glow: #ef444422; --p6-bar: #ef4444;
+    --p7-c: #a78bfa; --p7-bg: #1a0f2d; --p7-glow: #8b5cf622; --p7-bar: #8b5cf6;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -212,9 +221,9 @@
   /* Active card fills the active zone */
   .player-card.active {
     flex: 1;
-    border-color: var(--green);
-    background: var(--surface2);
-    box-shadow: 0 0 24px #22c55e1a;
+    border-color: var(--pc, var(--green));
+    background: var(--pc-bg, var(--surface2));
+    box-shadow: 0 0 24px var(--pc-glow, #22c55e1a);
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -223,7 +232,7 @@
   }
   .player-card.active::before {
     content: ''; position: absolute; top: 0; left: 0; right: 0;
-    height: 3px; background: linear-gradient(90deg, transparent, var(--green), transparent);
+    height: 3px; background: linear-gradient(90deg, transparent, var(--pc-bar, var(--green)), transparent);
   }
 
   /* Inactive cards are compact rows */
@@ -232,7 +241,8 @@
     align-items: center;
     justify-content: space-between;
     padding: 6px 12px;
-    opacity: 0.7;
+    opacity: 0.65;
+    border-color: var(--pc, var(--border));
   }
   .player-card.inactive:hover { opacity: 0.9; }
 
@@ -244,7 +254,7 @@
   /* Active card internals */
   .card-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; width: 100%; }
   .player-name-label { font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--text-dim); }
-  .player-card.active .player-name-label { font-size: 13px; color: var(--green); }
+  .player-card.active .player-name-label { font-size: 32px; font-family: 'Bebas Neue', sans-serif; letter-spacing: 3px; color: var(--pc); }
 
   .card-top-right { display: flex; align-items: center; gap: 8px; }
   .active-badge {
@@ -258,7 +268,7 @@
   .avg-display { font-size: 11px; color: var(--text-dim); }
   .avg-display strong { color: var(--text); }
   .player-card.active .avg-display { font-size: 14px; }
-  .player-card.active .avg-display strong { color: var(--green-bright); font-size: 16px; }
+  .player-card.active .avg-display strong { color: var(--pc, var(--green-bright)); font-size: 16px; }
 
   /* Score — centred and huge on active card */
   .card-middle {
@@ -275,20 +285,20 @@
   }
   .player-card.active .player-score {
     font-size: clamp(80px, 20vw, 130px);
-    color: var(--green-bright);
-    text-shadow: 0 0 60px #22c55e44;
+    color: var(--pc, var(--green-bright));
+    text-shadow: 0 0 60px var(--pc-glow, #22c55e44);
   }
   .player-card.winner .player-score { color: var(--gold); }
 
   .card-bottom-right { text-align: center; }
   .checkout-hint { font-size: 12px; color: var(--gold); font-weight: 600; min-height: 17px; }
-  .player-card.active .checkout-hint { font-size: 22px; min-height: 30px; margin-top: 6px; letter-spacing: 0.5px; }
+  .player-card.active .checkout-hint { font-size: 32px; min-height: 38px; margin-top: 8px; letter-spacing: 0.5px; color: var(--gold); }
   .legs-won-badge { font-size: 10px; color: var(--text-dim); letter-spacing: 1px; }
   .player-card.active .legs-won-badge { font-size: 13px; }
 
   /* Inactive card internals */
-  .inactive-name { font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--text-dim); flex: 1; }
-  .inactive-score { font-family: 'Bebas Neue', sans-serif; font-size: 38px; color: var(--text); line-height: 1; margin-left: 12px; }
+  .inactive-name { font-size: 13px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--pc, var(--text-dim)); flex: 1; }
+  .inactive-score { font-family: 'Bebas Neue', sans-serif; font-size: 38px; color: var(--pc, var(--text)); line-height: 1; margin-left: 12px; }
   .inactive-avg { font-size: 11px; color: var(--text-dim); margin-left: 12px; text-align: right; min-width: 48px; }
   .inactive-avg strong { color: var(--text); display: block; }
   .inactive-legs { font-size: 10px; color: var(--text-dim); margin-left: 10px; letter-spacing: 1px; }
@@ -693,6 +703,26 @@ function beginLeg(firstIdx, isFirst) {
   updateInputArea();
 }
 
+// ═══ PLAYER COLOURS
+const PLAYER_COLOURS = [
+  { c:'#4ade80', bg:'#0f2d1a', glow:'#22c55e22', bar:'#22c55e' },
+  { c:'#60a5fa', bg:'#0f1a2d', glow:'#3b82f622', bar:'#3b82f6' },
+  { c:'#fb923c', bg:'#2d1a0f', glow:'#f9741622', bar:'#f97416' },
+  { c:'#e879f9', bg:'#2a0f2d', glow:'#d946ef22', bar:'#d946ef' },
+  { c:'#facc15', bg:'#2d2a0f', glow:'#eab30822', bar:'#eab308' },
+  { c:'#2dd4bf', bg:'#0f2d2a', glow:'#14b8a622', bar:'#14b8a6' },
+  { c:'#f87171', bg:'#2d0f0f', glow:'#ef444422', bar:'#ef4444' },
+  { c:'#a78bfa', bg:'#1a0f2d', glow:'#8b5cf622', bar:'#8b5cf6' }
+];
+
+function applyPlayerColour(el, playerIdx) {
+  const col = PLAYER_COLOURS[playerIdx % PLAYER_COLOURS.length];
+  el.style.setProperty('--pc',     col.c);
+  el.style.setProperty('--pc-bg',  col.bg);
+  el.style.setProperty('--pc-glow',col.glow);
+  el.style.setProperty('--pc-bar', col.bar);
+}
+
 // ═══ SCOREBOARD
 function currentLeg() {
   return players.reduce((s,p) => s + p.legsWon, 0) + 1;
@@ -712,6 +742,7 @@ function renderScoreboard() {
   const activeCard = document.createElement('div');
   activeCard.className = 'player-card active';
   activeCard.id = 'card-' + activeIdx;
+  applyPlayerColour(activeCard, activeIdx);
   const legAvgA = ap.legDarts > 0 ? ((ap.legScored / ap.legDarts) * 3).toFixed(1) : '-';
   const checkoutA = ap.score >= 2 && ap.score <= 170 ? CHECKOUTS[ap.score] : null;
   const legsStrA = legsToWin > 1 ? ap.legsWon + ' LEG' + (ap.legsWon !== 1 ? 'S' : '') : '';
@@ -724,12 +755,14 @@ function renderScoreboard() {
       '</div>' +
     '</div>' +
     '<div class="card-middle">' +
-      '<div class="player-score" id="score-' + activeIdx + '">' + ap.score + '</div>' +
+      '<div style="text-align:center">' +
+        '<div class="player-score" id="score-' + activeIdx + '">' + ap.score + '</div>' +
+        '<div class="checkout-hint" id="co-' + activeIdx + '">' + (checkoutA ? '🎯 ' + checkoutA : '') + '</div>' +
+      '</div>' +
     '</div>' +
     '<div class="card-bottom">' +
       '<div class="card-bottom-right">' +
         (legsStrA ? '<div class="legs-won-badge">' + legsStrA + '</div>' : '') +
-        '<div class="checkout-hint" id="co-' + activeIdx + '">' + (checkoutA ? '🎯 ' + checkoutA : '') + '</div>' +
       '</div>' +
     '</div>';
   activeZone.appendChild(activeCard);
@@ -745,6 +778,7 @@ function renderScoreboard() {
       const card = document.createElement('div');
       card.className = 'player-card inactive';
       card.id = 'card-' + i;
+      applyPlayerColour(card, i);
       const legAvg = p.legDarts > 0 ? ((p.legScored / p.legDarts) * 3).toFixed(1) : '-';
       const legsStr = legsToWin > 1 ? p.legsWon + ' LEG' + (p.legsWon !== 1 ? 'S' : '') : '';
       card.innerHTML =
