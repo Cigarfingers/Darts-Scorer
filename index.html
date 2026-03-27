@@ -302,7 +302,16 @@
 
   .card-bottom-right { text-align: center; }
   .checkout-hint { font-size: 12px; color: var(--gold); font-weight: 600; min-height: 17px; }
-  .player-card.active .checkout-hint { font-size: 32px; min-height: 38px; margin-top: 8px; letter-spacing: 0.5px; color: var(--gold); }
+  .player-card.active .checkout-hint {
+    font-size: 32px;
+    min-height: 38px;
+    letter-spacing: 0.5px;
+    color: var(--gold);
+    text-align: center;
+    width: 100%;
+    flex-shrink: 0;
+    display: block;
+  }
   .legs-won-badge { font-size: 10px; color: var(--text-dim); letter-spacing: 1px; }
   .player-card.active .legs-won-badge { font-size: 13px; }
 
@@ -391,32 +400,22 @@
   /* iPhone small screen — compact layout, everything visible */
   @media (max-height: 750px) and (orientation: portrait) {
     .player-card.active {
-      justify-content: center;
-      gap: 0;
-      padding: 6px 12px;
-    }
-    .card-top {
-      flex-shrink: 0;
+      justify-content: flex-start;
+      gap: 6px;
+      padding: 8px 12px;
     }
     .card-middle {
       flex: 0 0 auto;
-      padding: 2px 0;
     }
     .player-card.active .player-score {
       font-size: clamp(52px, 14vw, 80px);
     }
     .player-card.active .checkout-hint {
       font-size: 22px;
-      min-height: 28px;
-      margin-top: 2px;
-      display: block;
+      min-height: 26px;
     }
     .player-card.active .player-name-label {
       font-size: 22px;
-    }
-    .card-bottom {
-      flex-shrink: 0;
-      min-height: 0;
     }
   }
 
@@ -856,11 +855,9 @@ function renderScoreboard() {
       '</div>' +
     '</div>' +
     '<div class="card-middle">' +
-      '<div style="text-align:center">' +
-        '<div class="player-score" id="score-' + activeIdx + '">' + ap.score + '</div>' +
-        '<div class="checkout-hint" id="co-' + activeIdx + '">' + (checkoutA ? '🎯 ' + checkoutA : '') + '</div>' +
-      '</div>' +
+      '<div class="player-score" id="score-' + activeIdx + '">' + ap.score + '</div>' +
     '</div>' +
+    '<div class="checkout-hint" id="co-' + activeIdx + '">' + (checkoutA ? '🎯 ' + checkoutA : '') + '</div>' +
     '<div class="card-bottom">' +
       '<div class="card-bottom-right">' +
         (legsStrA ? '<div class="legs-won-badge">' + legsStrA + '</div>' : '') +
