@@ -773,6 +773,47 @@ function startBullThrow() {
   });
 }
 
+// ═══ SPEECH
+function speak(text) {
+  if (!window.speechSynthesis) return;
+  window.speechSynthesis.cancel();
+  const utt = new SpeechSynthesisUtterance(text);
+  utt.rate = 1.0;
+  utt.pitch = 1.0;
+  const voices = window.speechSynthesis.getVoices();
+  const uk = voices.find(v => v.lang === 'en-GB') || voices.find(v => v.lang.startsWith('en'));
+  if (uk) utt.voice = uk;
+  window.speechSynthesis.speak(utt);
+}
+
+function scoreToWords(n) {
+  const ones = ['','one','two','three','four','five','six','seven','eight','nine',
+    'ten','eleven','twelve','thirteen','fourteen','fifteen','sixteen','seventeen','eighteen','nineteen'];
+  const tens = ['','','twenty','thirty','forty','fifty','sixty','seventy','eighty','ninety'];
+  if (n === 0)   return 'zero';
+  if (n === 180) return 'one hundred and eighty';
+  if (n === 100) return 'one hundred';
+  if (n > 100)   return 'one hundred and ' + scoreToWords(n - 100);
+  if (n >= 20)   return tens[Math.floor(n/10)] + (n%10 ? ' ' + ones[n%10] : '');
+  return ones[n];
+}
+
+function dartToWords(d) {
+  // e.g. "T20" -> "treble twenty", "D16" -> "double sixteen", "S9" -> "nine", "Bull" -> "bullseye"
+  if (d === 'Bull') return 'bullseye';
+  const type = d[0];
+  const num = parseInt(d.slice(1));
+  const numWord = scoreToWords(num);
+  if (type === 'T') return 'treble ' + numWord;
+  if (type === 'D') return num === 20 ? 'double top' : 'double ' + numWord;
+  return numWord;
+}
+
+function checkoutToWords(route) {
+  // "T20 S9 D16" -> "treble twenty, nine, double sixteen"
+  return route.split(' ').map(dartToWords).join(', ');
+}
+
 function beginLeg(firstIdx, isFirst) {
   players.forEach(p => { p.score = gameType; p.legDarts = 0; p.legScored = 0; });
   history.length = 0;
@@ -802,6 +843,16 @@ function beginLeg(firstIdx, isFirst) {
 
   renderScoreboard();
   updateInputArea();
+
+  // Announce start
+  setTimeout(function() {
+    if (isFirst) {
+      speak(players[firstIdx].name + ' to throw first. Game on!');
+    } else {
+      const firstInLeg = players[turnOrder[0]];
+      speak('Next leg. ' + firstInLeg.name + ' to throw first.');
+    }
+  }, 400);
 }
 
 // ═══ PLAYER COLOURS
@@ -978,6 +1029,8 @@ function submitScore() {
   p.score = newScore;
   p.legDarts += 3; p.legScored += scored;
   p.totalDarts += 3; p.totalScored += scored;
+
+  speak(scoreToWords(scored));
   advanceTurn();
 }
 
@@ -986,11 +1039,13 @@ function confirmCheckout(darts) {
   const idx = pendingCheckoutIdx;
   const p = players[idx];
   p.score = 0;
-  // Count all darts in this visit: previous throws this visit were 3 minus remaining
-  // We don't track per-visit, so just record how many darts they actually used
   p.legDarts += darts; p.legScored += pendingCheckoutScored;
   p.totalDarts += darts; p.totalScored += pendingCheckoutScored;
   p.legsWon++;
+  var matchWillEnd = p.legsWon >= legsToWin;
+  setTimeout(function() {
+    speak(scoreToWords(pendingCheckoutScored) + '! ' + (matchWillEnd ? 'Game shot! ' : 'Leg shot! ') + p.name + '!');
+  }, 100);
   updateScoreDisplay();
   checkWin(idx);
 }
@@ -1005,6 +1060,7 @@ function recordBust() {
 
 function triggerBust(idx, fromButton) {
   currentInput = '';
+  speak('Bust!');
   const card = document.getElementById('card-' + idx);
   if (card) {
     card.classList.add('busted');
@@ -1021,6 +1077,15 @@ function advanceTurn() {
   currentTurnIdx = (currentTurnIdx + 1) % turnOrder.length;
   updateScoreDisplay();
   updateInputArea();
+  var next = players[turnOrder[currentTurnIdx]];
+  var co = next.score >= 2 && next.score <= 170 ? CHECKOUTS[next.score] : null;
+  setTimeout(function() {
+    if (co) {
+      speak(next.name + '. Require ' + checkoutToWords(co));
+    } else {
+      speak(next.name);
+    }
+  }, 1800);
 }
 
 // ═══ WIN
@@ -1074,6 +1139,15 @@ function showWin(winnerIdx, matchWin) {
   }
 
   document.getElementById('win-overlay').style.display = 'flex';
+
+  // Announce win
+  setTimeout(function() {
+    if (matchWin) {
+      speak('Match shot! ' + winner.name + ' wins the match. Well played everyone!');
+    } else {
+      speak('Game shot! ' + winner.name + '!');
+    }
+  }, 400);
 }
 
 function nextLeg() {
@@ -1094,6 +1168,18 @@ function confirmNewGame() { if (confirm('Start a new game?')) goToSetup(); }
 
 // ═══ INIT
 renderPlayerInputs();
+
+// Preload voices — iOS needs a user gesture first, this fires on first touch
+document.addEventListener('touchstart', function preloadVoices() {
+  if (window.speechSynthesis) {
+    window.speechSynthesis.getVoices();
+    // Speak a silent utterance to unlock audio on iOS
+    var u = new SpeechSynthesisUtterance('');
+    u.volume = 0;
+    window.speechSynthesis.speak(u);
+  }
+  document.removeEventListener('touchstart', preloadVoices);
+}, { once: true });
 
 // Build numpad — use touchstart on touch devices, click on desktop, never both
 (function buildNumpad() {
