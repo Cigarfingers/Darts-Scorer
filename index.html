@@ -1060,7 +1060,7 @@ function confirmCheckout(darts) {
   p.legsWon++;
   var matchWillEnd = p.legsWon >= legsToWin;
   setTimeout(function() {
-    speak(scoreToWords(pendingCheckoutScored) + '! ' + (matchWillEnd ? 'Game shot! ' : 'Leg shot! ') + p.name + '!');
+    speak(scoreToWords(pendingCheckoutScored) + '! ' + (matchWillEnd ? 'Game shot and the match! ' : 'Game shot and the leg! ') + p.name + '!');
   }, 100);
   updateScoreDisplay();
   checkWin(idx);
