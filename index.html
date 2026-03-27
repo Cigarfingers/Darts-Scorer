@@ -194,14 +194,15 @@
     -webkit-overflow-scrolling: touch;
   }
 
-  /* Active player zone — fixed height using dvh so it always fits portrait & landscape */
+  /* Active player zone — fills all remaining space dynamically */
   .scoreboard-active-zone {
-    height: 28dvh;
+    flex: 1;
     min-height: 120px;
-    flex-shrink: 0;
     padding: 6px 8px 4px;
     display: flex;
     flex-direction: column;
+    position: relative;
+    z-index: 2;
   }
 
   /* Inactive players zone — just stacks, scoreboard scrolls if needed */
