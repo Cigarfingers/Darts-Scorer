@@ -218,6 +218,8 @@
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    align-items: center;
+    text-align: center;
   }
   .player-card.active::before {
     content: ''; position: absolute; top: 0; left: 0; right: 0;
@@ -240,7 +242,7 @@
   @keyframes winner-pulse { from { box-shadow: 0 0 16px #f59e0b33; } to { box-shadow: 0 0 32px #f59e0b66; } }
 
   /* Active card internals */
-  .card-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
+  .card-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; width: 100%; }
   .player-name-label { font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--text-dim); }
   .player-card.active .player-name-label { font-size: 13px; color: var(--green); }
 
@@ -258,29 +260,35 @@
   .player-card.active .avg-display { font-size: 14px; }
   .player-card.active .avg-display strong { color: var(--green-bright); font-size: 16px; }
 
-  /* Score — huge on active card */
-  .card-bottom { display: flex; align-items: flex-end; justify-content: space-between; }
+  /* Score — centred and huge on active card */
+  .card-middle {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .card-bottom { display: flex; align-items: flex-end; justify-content: center; width: 100%; }
   .player-score {
     font-family: 'Bebas Neue', sans-serif;
     font-size: clamp(38px, 9vw, 52px);
     line-height: 1; color: var(--text);
   }
   .player-card.active .player-score {
-    font-size: clamp(72px, 18vw, 110px);
+    font-size: clamp(80px, 20vw, 130px);
     color: var(--green-bright);
-    text-shadow: 0 0 40px #22c55e33;
+    text-shadow: 0 0 60px #22c55e44;
   }
   .player-card.winner .player-score { color: var(--gold); }
 
-  .card-bottom-right { text-align: right; }
+  .card-bottom-right { text-align: center; }
   .checkout-hint { font-size: 12px; color: var(--gold); font-weight: 600; min-height: 17px; }
-  .player-card.active .checkout-hint { font-size: 15px; min-height: 22px; }
+  .player-card.active .checkout-hint { font-size: 16px; min-height: 24px; margin-top: 4px; }
   .legs-won-badge { font-size: 10px; color: var(--text-dim); letter-spacing: 1px; }
   .player-card.active .legs-won-badge { font-size: 13px; }
 
   /* Inactive card internals */
   .inactive-name { font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--text-dim); flex: 1; }
-  .inactive-score { font-family: 'Bebas Neue', sans-serif; font-size: 28px; color: var(--text); line-height: 1; margin-left: 12px; }
+  .inactive-score { font-family: 'Bebas Neue', sans-serif; font-size: 38px; color: var(--text); line-height: 1; margin-left: 12px; }
   .inactive-avg { font-size: 11px; color: var(--text-dim); margin-left: 12px; text-align: right; min-width: 48px; }
   .inactive-avg strong { color: var(--text); display: block; }
   .inactive-legs { font-size: 10px; color: var(--text-dim); margin-left: 10px; letter-spacing: 1px; }
@@ -715,8 +723,10 @@ function renderScoreboard() {
         '<div class="active-badge">NOW</div>' +
       '</div>' +
     '</div>' +
-    '<div class="card-bottom">' +
+    '<div class="card-middle">' +
       '<div class="player-score" id="score-' + activeIdx + '">' + ap.score + '</div>' +
+    '</div>' +
+    '<div class="card-bottom">' +
       '<div class="card-bottom-right">' +
         (legsStrA ? '<div class="legs-won-badge">' + legsStrA + '</div>' : '') +
         '<div class="checkout-hint" id="co-' + activeIdx + '">' + (checkoutA ? '🎯 ' + checkoutA : '') + '</div>' +
