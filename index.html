@@ -189,28 +189,30 @@
     flex: 1;
     display: flex;
     flex-direction: column;
-    overflow: hidden;
     min-height: 0;
+    overflow: hidden;
   }
 
-  /* Active player zone — grows to fill available space, never shrinks below min */
+  /* Active player zone — always gets at least 155px, takes remaining space */
   .scoreboard-active-zone {
     flex: 1;
-    min-height: 160px;
+    min-height: 155px;
     padding: 8px 8px 4px;
     display: flex;
     flex-direction: column;
+    overflow: hidden;
   }
 
-  /* Inactive players zone — compact rows, scrollable if needed */
+  /* Inactive players zone — each card ~56px, cap at 3 visible then scroll */
   .scoreboard-inactive-zone {
     padding: 0 8px 6px;
     display: flex;
     flex-direction: column;
     gap: 4px;
     flex-shrink: 0;
-    max-height: 55vh;
-    overflow-y: auto;
+    max-height: calc(3 * 60px);
+    overflow-y: scroll;
+    -webkit-overflow-scrolling: touch;
   }
 
   /* ── ACTIVE PLAYER CARD ── */
